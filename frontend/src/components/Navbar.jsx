@@ -1,73 +1,14 @@
-// import { Link, useNavigate } from "react-router-dom";
-
-// function Navbar() {
-//   const navigate = useNavigate();
-//   const isLoggedIn = localStorage.getItem("isLoggedIn");
-
-//   const handleChatbot = () => {
-//     if (!isLoggedIn) navigate("/login");
-//     else navigate("/chatbot");
-//   };
-
-//   const handleLogout = () => {
-//     localStorage.removeItem("isLoggedIn");
-//     navigate("/");
-//   };
-
-//   return (
-//     <nav className="bg-green-700 text-white px-6 py-4 flex justify-between items-center">
-//       {/* Logo / College Name */}
-//       <h1 className="text-xl font-bold flex items-center gap-2">
-//         🌾 GBPUAT
-//       </h1>
-
-//       {/* Links */}
-//       <div className="flex items-center gap-4 text-lg">
-//         <Link to="/" className="hover:underline">Home</Link>
-//         <Link to="/about" className="hover:underline">About</Link>
-
-//         {!isLoggedIn && (
-//           <Link to="/login" className="hover:underline">
-//             Login
-//           </Link>
-//         )}
-
-//         {isLoggedIn && (
-//           <button onClick={handleLogout} className="hover:underline">
-//             Logout
-//           </button>
-//         )}
-
-//         <button
-//           onClick={handleChatbot}
-//           className="bg-white text-green-700 px-4 py-1 rounded font-semibold hover:bg-green-100"
-//         >
-//           Chatbot
-//         </button>
-//       </div>
-//     </nav>
-//   );
-// }
-
-// export default Navbar;
-
-
 import { NavLink, useNavigate } from "react-router-dom";
 import { useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { LanguageContext } from "../context/LanguageContext";
+import collegeLogo from "../assets/cot.jpg";
 
 function Navbar() {
   const navigate = useNavigate();
   const isLoggedIn = localStorage.getItem("isLoggedIn");
   const [menuOpen, setMenuOpen] = useState(false);
-  const { language, toggleLanguage } = useContext(LanguageContext);
-
-  const handleChatbot = () => {
-    setMenuOpen(false);
-    if (!isLoggedIn) navigate("/login");
-    else navigate("/chatbot");
-  };
+  const { toggleLanguage } = useContext(LanguageContext);
 
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn");
@@ -88,25 +29,42 @@ function Navbar() {
       initial={{ y: -40, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="bg-green-700 px-6 py-4 shadow-md"
+      className="bg-green-700 px-6 py-4 shadow-md sticky top-0 z-50"
     >
       {/* TOP BAR */}
       <div className="flex justify-between items-center">
         {/* LOGO */}
         <div
           onClick={() => navigate("/")}
-          className="text-white text-xl font-bold flex items-center gap-2 cursor-pointer"
+          className="flex items-center gap-3 cursor-pointer"
         >
-          🌾 AgriAI
+          <img
+            src={collegeLogo}
+            alt="College Logo"
+            className="h-12 w-12 rounded-full bg-white p-1"
+          />
         </div>
 
         {/* DESKTOP MENU */}
         <div className="hidden md:flex items-center gap-3">
-          <NavLink to="/" className={navLinkStyle}>Home</NavLink>
-          <NavLink to="/about" className={navLinkStyle}>About</NavLink>
+          <NavLink to="/" className={navLinkStyle}>
+            Home
+          </NavLink>
+
+          <NavLink to="/about" className={navLinkStyle}>
+            About
+          </NavLink>
 
           {!isLoggedIn && (
-            <NavLink to="/login" className={navLinkStyle}>Login</NavLink>
+            <>
+              <NavLink to="/login" className={navLinkStyle}>
+                Login
+              </NavLink>
+
+              <NavLink to="/signup" className={navLinkStyle}>
+                Signup
+              </NavLink>
+            </>
           )}
 
           {isLoggedIn && (
@@ -118,21 +76,19 @@ function Navbar() {
             </button>
           )}
 
-          {/* LANGUAGE TOGGLE */}
-          <button
+          <motion.button
+            whileTap={{ rotate: 180, scale: 1.1 }}
             onClick={toggleLanguage}
-            className="px-3 py-1 rounded-full text-sm bg-green-600 text-white hover:bg-green-500 transition"
+            title="Change Language"
+            className="
+    text-2xl text-white cursor-pointer
+    p-2 rounded-full
+    hover:bg-green-600
+    transition
+  "
           >
-            {language === "en" ? "हिंदी" : "English"}
-          </button>
-
-          {/* CHATBOT CTA */}
-          <button
-            onClick={handleChatbot}
-            className="bg-white text-green-700 px-5 py-2 rounded-full font-semibold hover:bg-green-100 transition cursor-pointer"
-          >
-            Chatbot
-          </button>
+            🌐
+          </motion.button>
         </div>
 
         {/* HAMBURGER */}
@@ -152,18 +108,40 @@ function Navbar() {
           transition={{ duration: 0.3 }}
           className="md:hidden mt-4 bg-green-600 rounded-lg py-3 space-y-1"
         >
-          <NavLink onClick={() => setMenuOpen(false)} to="/" className={navLinkStyle}>
+          <NavLink
+            onClick={() => setMenuOpen(false)}
+            to="/"
+            className={navLinkStyle}
+          >
             Home
           </NavLink>
 
-          <NavLink onClick={() => setMenuOpen(false)} to="/about" className={navLinkStyle}>
+          <NavLink
+            onClick={() => setMenuOpen(false)}
+            to="/about"
+            className={navLinkStyle}
+          >
             About
           </NavLink>
 
           {!isLoggedIn && (
-            <NavLink onClick={() => setMenuOpen(false)} to="/login" className={navLinkStyle}>
-              Login
-            </NavLink>
+            <>
+              <NavLink
+                onClick={() => setMenuOpen(false)}
+                to="/login"
+                className={navLinkStyle}
+              >
+                Login
+              </NavLink>
+
+              <NavLink
+                onClick={() => setMenuOpen(false)}
+                to="/signup"
+                className={navLinkStyle}
+              >
+                Signup
+              </NavLink>
+            </>
           )}
 
           {isLoggedIn && (
@@ -175,19 +153,15 @@ function Navbar() {
             </button>
           )}
 
-          <button
+          {/* 🌐 LANGUAGE TOGGLE (MOBILE) */}
+          <motion.button
+            whileTap={{ scale: 0.95 }}
             onClick={toggleLanguage}
-            className="block w-full text-left px-4 py-2 bg-green-700 text-white rounded-md"
+            className="flex items-center gap-3 px-4 py-2 text-white text-lg
+                       hover:bg-green-700 rounded-md transition"
           >
-            {language === "en" ? "हिंदी" : "English"}
-          </button>
-
-          <button
-            onClick={handleChatbot}
-            className="block w-full text-left px-4 py-2 bg-white text-green-700 font-semibold rounded-md"
-          >
-            Chatbot
-          </button>
+            🌐 <span className="text-sm opacity-80">(Change Language)</span>
+          </motion.button>
         </motion.div>
       )}
     </motion.nav>
