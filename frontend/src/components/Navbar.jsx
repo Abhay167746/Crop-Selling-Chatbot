@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useState, useContext } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { LanguageContext } from "../context/LanguageContext";
 import collegeLogo from "../assets/cot.jpg";
 
@@ -17,153 +17,128 @@ function Navbar() {
   };
 
   const navLinkStyle = ({ isActive }) =>
-    `block px-4 py-2 rounded-md text-lg transition cursor-pointer
+    `relative px-4 py-2 text-lg transition-all
      ${
        isActive
-         ? "bg-white text-green-700 font-semibold"
-         : "text-white hover:bg-green-600"
-     }`;
+         ? "text-green-800 font-semibold"
+         : "text-green-900 hover:text-green-700"
+     }
+     after:absolute after:left-0 after:-bottom-1
+     after:h-[2px] after:bg-green-700
+     after:transition-all after:duration-300
+     ${isActive ? "after:w-full" : "after:w-0 hover:after:w-full"}
+    `;
 
   return (
     <motion.nav
-      initial={{ y: -40, opacity: 0 }}
+      initial={{ y: -60, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="bg-green-700 px-6 py-4 shadow-md sticky top-0 z-50"
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className="
+        fixed top-0 left-0 w-full z-50
+        bg-white/40 backdrop-blur-lg
+        border-b border-white/30
+        shadow-sm
+      "
     >
-      {/* TOP BAR */}
-      <div className="flex justify-between items-center">
+      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+
         {/* LOGO */}
-        <div
+        <motion.div
+          whileHover={{ scale: 1.05 }}
           onClick={() => navigate("/")}
           className="flex items-center gap-3 cursor-pointer"
         >
           <img
             src={collegeLogo}
             alt="College Logo"
-            className="h-12 w-12 rounded-full bg-white p-1"
+            className="h-11 w-11 rounded-full bg-white p-1 shadow"
           />
-        </div>
+        </motion.div>
 
         {/* DESKTOP MENU */}
-        <div className="hidden md:flex items-center gap-3">
-          <NavLink to="/" className={navLinkStyle}>
-            Home
-          </NavLink>
-
-          <NavLink to="/about" className={navLinkStyle}>
-            About
-          </NavLink>
+        <div className="hidden md:flex items-center gap-6">
+          <NavLink to="/" className={navLinkStyle}>Home</NavLink>
+          <NavLink to="/about" className={navLinkStyle}>About</NavLink>
 
           {!isLoggedIn && (
             <>
-              <NavLink to="/login" className={navLinkStyle}>
-                Login
-              </NavLink>
-
-              <NavLink to="/signup" className={navLinkStyle}>
-                Signup
-              </NavLink>
+              <NavLink to="/login" className={navLinkStyle}>Login</NavLink>
+              <NavLink to="/signup" className={navLinkStyle}>Signup</NavLink>
             </>
           )}
 
           {isLoggedIn && (
             <button
               onClick={handleLogout}
-              className="px-4 py-2 text-white hover:bg-red-600 rounded-md transition cursor-pointer"
+              className="
+                px-4 py-2 rounded-full
+                bg-red-500/90 text-white
+                hover:bg-red-600 transition
+              "
             >
               Logout
             </button>
           )}
-
-          <motion.button
-            whileTap={{ rotate: 180, scale: 1.1 }}
-            onClick={toggleLanguage}
-            title="Change Language"
-            className="
-    text-2xl text-white cursor-pointer
-    p-2 rounded-full
-    hover:bg-green-600
-    transition
-  "
-          >
-            🌐
-          </motion.button>
         </div>
 
         {/* HAMBURGER */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden text-white text-3xl cursor-pointer"
+          className="md:hidden text-3xl text-green-800"
         >
           ☰
         </button>
       </div>
 
       {/* MOBILE MENU */}
-      {menuOpen && (
-        <motion.div
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: "auto", opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          className="md:hidden mt-4 bg-green-600 rounded-lg py-3 space-y-1"
-        >
-          <NavLink
-            onClick={() => setMenuOpen(false)}
-            to="/"
-            className={navLinkStyle}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="md:hidden bg-white/80 backdrop-blur-lg px-6 py-4 space-y-3"
           >
-            Home
-          </NavLink>
+            <NavLink onClick={() => setMenuOpen(false)} to="/" className={navLinkStyle}>
+              Home
+            </NavLink>
 
-          <NavLink
-            onClick={() => setMenuOpen(false)}
-            to="/about"
-            className={navLinkStyle}
-          >
-            About
-          </NavLink>
+            <NavLink onClick={() => setMenuOpen(false)} to="/about" className={navLinkStyle}>
+              About
+            </NavLink>
 
-          {!isLoggedIn && (
-            <>
-              <NavLink
-                onClick={() => setMenuOpen(false)}
-                to="/login"
-                className={navLinkStyle}
+            {!isLoggedIn && (
+              <>
+                <NavLink onClick={() => setMenuOpen(false)} to="/login" className={navLinkStyle}>
+                  Login
+                </NavLink>
+
+                <NavLink onClick={() => setMenuOpen(false)} to="/signup" className={navLinkStyle}>
+                  Signup
+                </NavLink>
+              </>
+            )}
+
+            {isLoggedIn && (
+              <button
+                onClick={handleLogout}
+                className="block w-full text-left text-red-600 px-4 py-2"
               >
-                Login
-              </NavLink>
+                Logout
+              </button>
+            )}
 
-              <NavLink
-                onClick={() => setMenuOpen(false)}
-                to="/signup"
-                className={navLinkStyle}
-              >
-                Signup
-              </NavLink>
-            </>
-          )}
-
-          {isLoggedIn && (
             <button
-              onClick={handleLogout}
-              className="block w-full text-left px-4 py-2 text-white hover:bg-red-600 rounded-md transition"
+              onClick={toggleLanguage}
+              className="text-lg flex items-center gap-2"
             >
-              Logout
+              🌐 Change Language
             </button>
-          )}
-
-          {/* 🌐 LANGUAGE TOGGLE (MOBILE) */}
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={toggleLanguage}
-            className="flex items-center gap-3 px-4 py-2 text-white text-lg
-                       hover:bg-green-700 rounded-md transition"
-          >
-            🌐 <span className="text-sm opacity-80">(Change Language)</span>
-          </motion.button>
-        </motion.div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.nav>
   );
 }
