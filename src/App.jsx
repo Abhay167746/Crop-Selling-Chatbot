@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
@@ -8,10 +8,16 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Chatbot from "./pages/Chatbot";
 
-function App() {
+/* Layout Controller */
+function Layout() {
+  const location = useLocation();
+
+  // Hide navbar & footer on chatbot page
+  const hideLayout = location.pathname === "/chatbot";
+
   return (
-    <BrowserRouter>
-      <Navbar />
+    <>
+      {!hideLayout && <Navbar />}
 
       <Routes>
         <Route path="/" element={<Home />} />
@@ -21,7 +27,15 @@ function App() {
         <Route path="/chatbot" element={<Chatbot />} />
       </Routes>
 
-      <Footer />
+      {!hideLayout && <Footer />}
+    </>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Layout />
     </BrowserRouter>
   );
 }
