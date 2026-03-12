@@ -1,106 +1,7 @@
-// // import express from "express";
-// // import cors from "cors";
-// // import dotenv from "dotenv";
-// // import OpenAI from "openai";
-
-// // dotenv.config();
-
-// // const app = express();
-// // app.use(cors());
-// // app.use(express.json());
-
-// // const openai = new OpenAI({
-// //   apiKey: process.env.OPENAI_API_KEY,
-// // });
-
-
-// // // API ROUTE
-
-// // app.post("/api/chat", async (req, res) => {
-// //   try {
-// //     const { message } = req.body;
-
-// //     if (!message || message.trim() === "") {
-// //       return res.status(400).json({
-// //         reply: "Please ask a valid question.",
-// //       });
-// //     }
-
-// //     const completion = await openai.chat.completions.create({
-// //       model: "gpt-4o-mini",
-// //       messages: [
-
-// //         {
-// //   role: "system",
-// //   content: `
-// // You are a Crop Selling Assistant for farmers of Uttarakhand (India).
-
-// // GOAL:
-// // Help farmers sell crops at the best nearby shop or buyer for better profit.
-
-// // STRICT RULES:
-// // - Use very simple words
-// // - Short lines only
-// // - NO paragraphs
-// // - ONLY headings + bullet points
-// // - Max 2 bullets per section
-// // - Farmer should understand in 5–10 seconds
-// // - Do NOT invent phone numbers
-// // - Do NOT guarantee prices
-// // - Be realistic and honest
-
-// // ALWAYS reply in this EXACT FORMAT:
-
-// // 📍 BEST NEARBY BUYERS / SHOPS
-// // • Known shop / buyer name + area
-// // • Hotel / retailer / wholesaler area nearby
-
-// // 💰 EXPECTED PRICE
-// // • ₹XX – ₹XX per kg (approx, may change daily)
-
-// // ⏰ BEST TIME TO SELL
-// // • Time of day
-// // • Best month or season
-
-// // 🚜 IMPORTANT TIP
-// // • One very useful farmer tip
-
-// // IMPORTANT:
-// // - Focus ONLY on Uttarakhand districts
-// // - Prefer local shops, hotels, retailers, bulk buyers
-// // - Avoid mandi unless clearly useful
-// // - If exact shop name is unsure, mention well-known buying areas`
-
-// // },
-// //         {
-// //           role: "user",
-// //           content: message,
-// //         },
-// //       ],
-// //     });
-
-// //     res.json({
-// //       reply: completion.choices[0].message.content,
-// //     });
-// //   } catch (error) {
-// //     console.error("❌ OpenAI Error:", error);
-// //     res.status(500).json({
-// //       reply: "AI service error. Please try again later.",
-// //     });
-// //   }
-// // });
-
-// // // ======================
-// // const PORT = process.env.PORT || 5000;
-// // app.listen(PORT, () => {
-// //   console.log(`✅ Server running on http://localhost:${PORT}`);
-// // });
-
-
 // import express from "express";
 // import cors from "cors";
 // import dotenv from "dotenv";
-// import { GoogleGenerativeAI } from "@google/generative-ai";
+// import Groq from "groq-sdk";
 
 // dotenv.config();
 
@@ -108,81 +9,169 @@
 // app.use(cors());
 // app.use(express.json());
 
-// // Gemini setup
-// const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-// const model = genAI.getGenerativeModel({
-//   model: "gemini-1.5-flash",
+// const groq = new Groq({
+//   apiKey: process.env.GROQ_API_KEY
 // });
-// // ======================
-// // CHATBOT API ROUTE
-// // ======================
-// app.post("/api/chat", async (req, res) => {
-//   try {
-//     const { message } = req.body;
 
-//     if (!message || message.trim() === "") {
+// /* Supported Crops */
+// const crops = ["tomato", "onion", "potato", "cabbage", "cauliflower"];
+
+// /* Greeting words */
+// const greetings = ["hi", "hello", "namaste", "hey"];
+
+// /* Detect Crop */
+// function detectCrop(message) {
+//   return crops.find(crop => message.includes(crop));
+// }
+
+// /* Detect Intent */
+// function detectIntent(message) {
+
+//   if (message.includes("price") || message.includes("rate") || message.includes("cost"))
+//     return "price";
+
+//   if (message.includes("sell") || message.includes("buyer") || message.includes("where"))
+//     return "buyers";
+
+//   if (message.includes("time") || message.includes("when"))
+//     return "best_time";
+
+//   if (message.includes("tip") || message.includes("how"))
+//     return "tips";
+
+//   return "general";
+// }
+
+// app.post("/api/chat", async (req, res) => {
+
+//   try {
+
+//     const message = req.body.message.toLowerCase().trim();
+
+//     /* 1️⃣ Greeting */
+//     if (greetings.some(g => message.includes(g))) {
 //       return res.json({
-//         reply: "❌ Please ask a valid question.",
+//         reply: `👋 Namaste! I am your Crop Selling Assistant for the Haldwani region.
+
+// You can ask about:
+
+// • Tomato
+// • Onion
+// • Potato
+// • Cabbage
+// • Cauliflower
+
+// Example:
+// "Tomato price in Haldwani"`
 //       });
 //     }
 
+//     /* 2️⃣ Detect Crop */
+//     const crop = detectCrop(message);
+
+//     if (!crop) {
+//       return res.json({
+//         reply: `🌾 I currently provide information only for these crops:
+
+// • Tomato
+// • Onion
+// • Potato
+// • Cabbage
+// • Cauliflower
+
+// Example:
+// "Where can I sell tomatoes in Haldwani?"`
+//       });
+//     }
+
+//     /* 3️⃣ Handle single crop query like "tomato" */
+
+//     const words = message.split(" ");
+
+//     if (words.length === 1 && crops.includes(words[0])) {
+//       return res.json({
+//         reply: `🌾 You selected **${crop}**.
+
+// What would you like to know?
+
+// • ${crop} price in Haldwani
+// • Where can I sell ${crop}
+// • Best time to sell ${crop}`
+//       });
+//     }
+
+//     /* 4️⃣ Detect Intent */
+//     const intent = detectIntent(message);
+
+//     /* 5️⃣ AI Prompt */
+
 //     const prompt = `
-// You are a Professional Crop Selling Assistant for farmers of Uttarakhand (India).
+// You are an agricultural assistant helping farmers ONLY in HALDWANI, Uttarakhand.
 
 // IMPORTANT RULES:
-// - Use simple language
-// - Short bullet points
-// - No paragraphs
+// - Do NOT mention any other city.
+// - Only suggest Haldwani markets.
+// - Do NOT invent locations.
 
-// FORMAT:
+// Crop: ${crop}
+// Intent: ${intent}
+// Location: Haldwani
+
+// Respond strictly in this format:
 
 // 📍 BEST NEARBY BUYERS / SHOPS
-// • buyer or market area
-// • retailer or hotel buyers nearby
+// • Haldwani vegetable mandi
+// • Local retailers in Haldwani
 
 // 💰 EXPECTED PRICE
-// • ₹XX – ₹XX per kg (approx)
+// • Approximate price per kg
 
 // ⏰ BEST TIME TO SELL
-// • time of day
-// • best season/month
+// • Best selling time in Haldwani market
 
 // 🚜 IMPORTANT TIP
-// • one useful tip
-
-// Question:
-// ${message}
+// • Helpful farmer tip
 // `;
 
-//     const result = await model.generateContent(prompt);
-
-//     const response = result.response.text();
+//     const chat = await groq.chat.completions.create({
+//       messages: [
+//         {
+//           role: "system",
+//           content: prompt
+//         },
+//         {
+//           role: "user",
+//           content: message
+//         }
+//       ],
+//       model: "llama-3.1-8b-instant"
+//     });
 
 //     res.json({
-//       reply: response,
+//       reply: chat.choices[0].message.content
 //     });
 
 //   } catch (error) {
-//     console.error("Gemini Error:", error);
+
+//     console.error(error);
 
 //     res.json({
-//       reply: "⚠️ AI service error. Please try again later.",
+//       reply: "⚠️ AI service error. Please try again."
 //     });
+
 //   }
+
 // });
 
-// // ======================
-// const PORT = process.env.PORT || 5000;
-
-// app.listen(PORT, () => {
-//   console.log(`✅ Server running on http://localhost:${PORT}`);
+// app.listen(5000, () => {
+//   console.log("✅ Server running on http://localhost:5000");
 // });
+
 
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 
 dotenv.config();
 
@@ -190,81 +179,164 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ======================
-// GEMINI SETUP
-// ======================
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-// Correct model
-const model = genAI.getGenerativeModel({
-  model: "gemini-2.0-flash"
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY
 });
 
-// ======================
-// CHATBOT API ROUTE
-// ======================
-app.post("/api/chat", async (req, res) => {
-  try {
-    const { message } = req.body;
+/* Supported Crops */
+const crops = ["tomato", "onion", "potato", "cabbage", "cauliflower"];
 
-    if (!message || message.trim() === "") {
+/* Greeting words */
+const greetings = ["hi", "hello", "namaste", "hey"];
+
+/* Haldwani Market Data */
+const marketData = {
+  tomato: {
+    price: "₹20 – ₹35 per kg",
+    buyers: [
+      "Haldwani Sabzi Mandi",
+      "Local retailers in Sadar Bazar"
+    ]
+  },
+
+  onion: {
+    price: "₹25 – ₹40 per kg",
+    buyers: [
+      "Haldwani Sabzi Mandi",
+      "Wholesale vegetable traders"
+    ]
+  },
+
+  potato: {
+    price: "₹18 – ₹30 per kg",
+    buyers: [
+      "Haldwani Sabzi Mandi",
+      "Local grocery stores"
+    ]
+  },
+
+  cabbage: {
+    price: "₹12 – ₹20 per kg",
+    buyers: [
+      "Haldwani vegetable market",
+      "Nearby vegetable retailers"
+    ]
+  },
+
+  cauliflower: {
+    price: "₹15 – ₹25 per kg",
+    buyers: [
+      "Haldwani Sabzi Mandi",
+      "Vegetable wholesalers"
+    ]
+  }
+};
+
+/* Detect Crop */
+function detectCrop(message) {
+  return crops.find(crop => message.includes(crop));
+}
+
+app.post("/api/chat", async (req, res) => {
+
+  try {
+
+    const message = req.body.message.toLowerCase().trim();
+
+    /* Greeting */
+
+    if (greetings.some(g => message.includes(g))) {
       return res.json({
-        reply: "❌ Please ask a valid question."
+        reply: `👋 Namaste! I am your Crop Selling Assistant for the Haldwani region.
+
+You can ask about:
+
+• Tomato
+• Onion
+• Potato
+• Cabbage
+• Cauliflower
+
+Example:
+"Tomato price in Haldwani"`
       });
     }
 
-    const prompt = `
-You are a Crop Selling Assistant for farmers of Uttarakhand (India).
+    /* Detect Crop */
 
-RULES:
-- Use simple language
-- Short bullet points
-- No paragraphs
-- Farmer friendly
-- No fake phone numbers
-- No guaranteed prices
+    const crop = detectCrop(message);
 
-RESPONSE FORMAT:
+    if (!crop) {
+      return res.json({
+        reply: `🌾 Please ask about these crops:
 
-📍 BEST NEARBY BUYERS / SHOPS
-• buyer/shop name + area
-• retailer / hotel buyer nearby
+• Tomato
+• Onion
+• Potato
+• Cabbage
+• Cauliflower`
+      });
+    }
 
-💰 EXPECTED PRICE
-• ₹XX – ₹XX per kg (approx)
+    /* Handle single crop word */
 
-⏰ BEST TIME TO SELL
-• time of day
-• best month/season
+    if (message === crop) {
+      return res.json({
+        reply: `🌾 You selected ${crop}.
 
-🚜 IMPORTANT TIP
-• one useful farmer tip
+What would you like to know?
 
-Farmer Question:
-${message}
-`;
+• ${crop} price in Haldwani
+• Where can I sell ${crop}
+• Best time to sell ${crop}`
+      });
+    }
 
-    const result = await model.generateContent(prompt);
+    /* Get Local Market Data */
 
-    const response = await result.response;
-    const text = response.text();
+    const data = marketData[crop];
+
+    /* AI only generates tip */
+
+    const aiTip = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content: `Give one short practical selling tip for farmers selling ${crop} in Haldwani market.`
+        }
+      ],
+      model: "llama-3.1-8b-instant"
+    });
+
+    const tip = aiTip.choices[0].message.content;
 
     res.json({
-      reply: text
+      reply: `📍 BEST NEARBY BUYERS / SHOPS
+• ${data.buyers[0]}
+• ${data.buyers[1]}
+
+💰 EXPECTED PRICE
+• ${data.price}
+
+⏰ BEST TIME TO SELL
+• Early morning (6 AM – 10 AM)
+
+🚜 IMPORTANT TIP
+• ${tip}`
     });
 
   } catch (error) {
-    console.error("Gemini Error:", error);
+
+    console.error(error);
 
     res.json({
-      reply: "⚠️ AI service error. Please try again later."
+      reply: "⚠️ AI service error."
     });
+
   }
+
 });
 
-// ======================
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+app.listen(5000, () => {
+  console.log("✅ Server running on http://localhost:5000");
 });
