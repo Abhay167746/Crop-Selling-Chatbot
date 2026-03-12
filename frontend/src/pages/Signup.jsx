@@ -1,32 +1,3 @@
-// import { Link, useNavigate } from "react-router-dom";
-
-// function Signup() {
-//   const navigate = useNavigate();
-
-//   const handleSignup = () => {
-//     navigate("/login");
-//   };
-
-//   return (
-//     <div style={{ padding: "40px", textAlign: "center" }}>
-//       <h1>Sign Up</h1>
-
-//       <input placeholder="Name" /><br /><br />
-//       <input placeholder="Email" /><br /><br />
-//       <input type="password" placeholder="Password" /><br /><br />
-
-//       <button onClick={handleSignup}>Create Account</button>
-
-//       <p style={{ marginTop: "10px" }}>
-//         Already have an account? <Link to="/login">Login</Link>
-//       </p>
-//     </div>
-//   );
-// }
-
-// export default Signup;
-
-
 import { Link, useNavigate } from "react-router-dom";
 
 function Signup() {
