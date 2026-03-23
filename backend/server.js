@@ -1,3 +1,4 @@
+import axios from "axios";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -9,164 +10,243 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Groq Setup
+
 const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY
+  apiKey: process.env.GROQ_API_KEY,
 });
 
-/* Supported Crops */
+
+// Data Config
+
 const crops = ["tomato", "onion", "potato", "cabbage", "cauliflower"];
 
-/* Greeting words */
-const greetings = ["hi", "hello", "namaste", "hey"];
+const locations = ["haldwani", "kathgodam", "tikonia", "bareilly road"];
 
-/* Haldwani Market Data */
-const marketData = {
-  tomato: {
-    price: "₹20 – ₹35 per kg",
-    buyers: [
-      "Haldwani Sabzi Mandi",
-      "Local retailers in Sadar Bazar"
-    ]
-  },
-
-  onion: {
-    price: "₹25 – ₹40 per kg",
-    buyers: [
-      "Haldwani Sabzi Mandi",
-      "Wholesale vegetable traders"
-    ]
-  },
-
-  potato: {
-    price: "₹18 – ₹30 per kg",
-    buyers: [
-      "Haldwani Sabzi Mandi",
-      "Local grocery stores"
-    ]
-  },
-
-  cabbage: {
-    price: "₹12 – ₹20 per kg",
-    buyers: [
-      "Haldwani vegetable market",
-      "Nearby vegetable retailers"
-    ]
-  },
-
-  cauliflower: {
-    price: "₹15 – ₹25 per kg",
-    buyers: [
-      "Haldwani Sabzi Mandi",
-      "Vegetable wholesalers"
-    ]
-  }
+const mandiData = {
+  tomato: { min: 18, max: 26 },
+  onion: { min: 20, max: 32 },
+  potato: { min: 12, max: 20 },
+  cabbage: { min: 10, max: 18 },
+  cauliflower: { min: 12, max: 22 },
 };
 
-/* Detect Crop */
-function detectCrop(message) {
-  return crops.find(crop => message.includes(crop));
+
+// FIXED Mandi API Function
+
+async function getMandiPrice(crop) {
+  try {
+    let allRecords = [];
+
+    //  multiple pages fetch
+    for (let i = 0; i < 3; i++) {
+      const response = await axios.get(
+        "https://api.data.gov.in/resource/35985678-0d79-46b4-9ed6-6f13308a1d24",
+        {
+          params: {
+            "api-key": process.env.DATA_GOV_API_KEY,
+            format: "json",
+            limit: 100,
+            offset: i * 100,
+          },
+        }
+      );
+
+      allRecords = [...allRecords, ...response.data.records];
+    }
+
+    console.log("Total Records:", allRecords.length);
+
+    //  better matching
+    const filtered = allRecords.filter((item) => {
+      const commodity = item.commodity?.toLowerCase() || "";
+      return commodity.includes(crop);
+    });
+
+    console.log("Filtered Records:", filtered.length);
+
+    if (filtered.length > 0) {
+      const data = filtered[0];
+
+      return {
+        min: parseInt(data.min_price) || 0,
+        max: parseInt(data.max_price) || 0,
+      };
+    }
+
+    // fallback
+    console.log("⚠️ No match found, using fallback");
+
+    const data = allRecords[0];
+
+    return {
+      min: parseInt(data.min_price) || 0,
+      max: parseInt(data.max_price) || 0,
+    };
+
+  } catch (error) {
+    console.log("❌ API Error:", error.message);
+    return null;
+  }
 }
 
+
+// Helper Functions
+
+function formatResponse(text) {
+  return text
+    .replace(/\n{2,}/g, "\n")
+    .replace(/•\s*/g, "• ")
+    .replace(/^\s+|\s+$/g, "")
+    .trim();
+}
+
+function isHindiText(text) {
+  return /[\u0900-\u097F]/.test(text);
+}
+
+
+// API ROUTE
+
 app.post("/api/chat", async (req, res) => {
-
   try {
+    const { message } = req.body;
 
-    const message = req.body.message.toLowerCase().trim();
+    if (!message || message.trim() === "") {
+      return res.json({ reply: "⚠️ Please ask a valid question." });
+    }
 
-    /* Greeting */
+    const lowerMsg = message.toLowerCase();
 
-    if (greetings.some(g => message.includes(g))) {
+    // Crop detection
+    const detectedCrop = crops.find((crop) =>
+      lowerMsg.includes(crop)
+    );
+
+    if (!detectedCrop) {
       return res.json({
-        reply: `👋 Namaste! I am your Crop Selling Assistant for the Haldwani region.
-
-You can ask about:
-
-• Tomato
-• Onion
-• Potato
-• Cabbage
-• Cauliflower
-
-Example:
-"Tomato price in Haldwani"`
+        reply:
+          "⚠️ Please ask about: Tomato, Onion, Potato, Cabbage, Cauliflower.",
       });
     }
 
-    /* Detect Crop */
+    // Location detection
+    const detectedLocation =
+      locations.find((loc) => lowerMsg.includes(loc)) || "haldwani";
 
-    const crop = detectCrop(message);
+    // Language detection
+    const languageInstruction = isHindiText(message)
+      ? "Respond in Hindi."
+      : "Respond in English.";
 
-    if (!crop) {
-      return res.json({
-        reply: `🌾 Please ask about these crops:
+    //  Real price fetch
+    let price = await getMandiPrice(detectedCrop);
 
-• Tomato
-• Onion
-• Potato
-• Cabbage
-• Cauliflower`
-      });
+    if (!price) {
+      console.log("⚠️ Using fallback price");
+      price = mandiData[detectedCrop];
     }
 
-    /* Handle single crop word */
+    const priceContext = `Latest price for ${detectedCrop} in ${detectedLocation}: ₹${price.min}–₹${price.max} per kg.`;
 
-    if (message === crop) {
-      return res.json({
-        reply: `🌾 You selected ${crop}.
+    // Prompt
+    const prompt = `
+${languageInstruction}
 
-What would you like to know?
+You are a Professional Crop Selling Assistant for farmers in Haldwani (India).
 
-• ${crop} price in Haldwani
-• Where can I sell ${crop}
-• Best time to sell ${crop}`
-      });
-    }
+${priceContext}
 
-    /* Get Local Market Data */
+Use these known buyers:
+- Naveen Mandi Haldwani
+- Tikonia Market
+- Kathgodam traders
 
-    const data = marketData[crop];
+━━━━━━━━━━━━━━━━━━━━━━━
+STRICT RULES:
+- NO paragraphs
+- ONLY headings + bullet points
+- Max 2 bullets per section
+- Very short lines
+- Use simple language
+━━━━━━━━━━━━━━━━━━━━━━━
 
-    /* AI only generates tip */
+FORMAT:
 
-    const aiTip = await groq.chat.completions.create({
+📍 BEST NEARBY BUYERS / SHOPS
+• Place + buyer type
+• Place + buyer type
+
+💰 EXPECTED PRICE
+• ₹XX – ₹XX per kg (approx)
+
+⏰ BEST TIME TO SELL
+• Time of day
+• Best season/month
+
+🚜 IMPORTANT TIP
+• One useful tip
+
+━━━━━━━━━━━━━━━━━━━━━━━
+
+User Question:
+${message}
+`;
+
+    // Groq API
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.1-8b-instant",
+      temperature: 0.2,
       messages: [
         {
           role: "system",
-          content: `Give one short practical selling tip for farmers selling ${crop} in Haldwani market.`
-        }
+          content:
+            "You are an expert agricultural assistant. Follow all formatting rules strictly.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
       ],
-      model: "llama-3.1-8b-instant"
     });
 
-    const tip = aiTip.choices[0].message.content;
+    const rawReply = completion.choices[0].message.content;
 
-    res.json({
-      reply: `📍 BEST NEARBY BUYERS / SHOPS
-• ${data.buyers[0]}
-• ${data.buyers[1]}
+    // Fallback response
+    if (!rawReply || rawReply.length < 20) {
+      return res.json({
+        reply: `📍 BEST NEARBY BUYERS / SHOPS
+• Naveen Mandi Haldwani – wholesalers
+• Tikonia Market – local retailers
 
 💰 EXPECTED PRICE
-• ${data.price}
+• ₹${price.min} – ₹${price.max} per kg
 
 ⏰ BEST TIME TO SELL
-• Early morning (6 AM – 10 AM)
+• Early morning
+• Seasonal demand period
 
 🚜 IMPORTANT TIP
-• ${tip}`
-    });
+• Sort crops before selling`,
+      });
+    }
+
+    const cleanReply = formatResponse(rawReply);
+
+    res.json({ reply: cleanReply });
 
   } catch (error) {
-
-    console.error(error);
+    console.error("❌ Groq Error:", error);
 
     res.json({
-      reply: "⚠️ AI service error."
+      reply: "⚠️ AI service error. Please try again.",
     });
-
   }
-
 });
 
-app.listen(5000, () => {
-  console.log("✅ Server running on http://localhost:5000");
+// ======================
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`✅ Server running on http://localhost:${PORT}`);
 });
