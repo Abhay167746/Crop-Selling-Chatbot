@@ -201,7 +201,7 @@ function Navbar() {
 
             <button
               onClick={toggleLanguage}
-              className="text-lg flex items-center gap-2"
+              className="text-lg flex items-center gap-2 cursor-pointer"
             >
               🌐 Change Language
             </button>
