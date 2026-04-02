@@ -281,7 +281,8 @@ export default function Home() {
   ];
 
   return (
-    <div style={{ background: "#070F07", fontFamily: "'DM Sans', sans-serif", color: "#fff" }}>
+    <div className="pt-20"
+     style={{ background: "#070F07", fontFamily: "'DM Sans', sans-serif", color: "#fff" }}>
 
       {/* Google Fonts */}
       <style>{`

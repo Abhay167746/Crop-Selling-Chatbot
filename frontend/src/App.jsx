@@ -83,7 +83,7 @@ function Layout() {
     <>
       {!hideLayout && <Navbar />}
 
-      <div className={!hideLayout ? "pt-16" : ""}>
+      <div className={!hideLayout ? "pt-0" : ""}>
         <Routes>
 
           {/* 🔥 CHANGE: chatbot is now default */}
