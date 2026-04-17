@@ -357,7 +357,7 @@ export default function Home() {
           >
             Sell Your Crops
             <br />
-            <span style={{ color: "#BBEC6C" }}>10× Smarter.</span>
+            {/* <span style={{ color: "#BBEC6C" }}>10× Smarter.</span> */}
           </motion.h1>
 
           <motion.p

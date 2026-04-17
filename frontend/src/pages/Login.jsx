@@ -1,242 +1,7 @@
-// import { useState } from "react";
-// import { Link, useNavigate } from "react-router-dom";
-// import { motion } from "framer-motion";
-
-// function Login() {
-//   const navigate = useNavigate();
-
-//   const [form, setForm] = useState({
-//     email: "",
-//     password: "",
-//   });
-
-//   const [error, setError] = useState("");
-//   const [loading, setLoading] = useState(false);
-
-//   const handleChange = (e) => {
-//     setForm({ ...form, [e.target.name]: e.target.value });
-//   };
-
-//   const handleLogin = async () => {
-//     setError("");
-
-//     if (!form.email || !form.password) {
-//       return setError("Please fill all fields");
-//     }
-
-//     try {
-//       setLoading(true);
-
-//       const res = await fetch("http://localhost:5000/api/auth/login", {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify(form),
-//       });
-
-//       const data = await res.json();
-
-//       if (!res.ok) {
-//         throw new Error(data.message || "Login failed");
-//       }
-
-//       // Save token
-//       localStorage.setItem("token", data.token);
-
-//       navigate("/chatbot");
-//     } catch (err) {
-//       setError(err.message);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 to-white px-4">
-
-//       <motion.div
-//         initial={{ opacity: 0, y: 40 }}
-//         animate={{ opacity: 1, y: 0 }}
-//         className="bg-white/80 backdrop-blur-lg shadow-xl rounded-2xl p-8 w-full max-w-md"
-//       >
-//         <h2 className="text-3xl font-bold text-center text-green-700 mb-6">
-//           🌾 Farmer Login
-//         </h2>
-
-//         {error && (
-//           <p className="text-red-500 text-center mb-4">{error}</p>
-//         )}
-
-//         <input
-//           name="email"
-//           onChange={handleChange}
-//           className="w-full p-3 border rounded mb-4 text-lg focus:outline-green-500"
-//           placeholder="Email"
-//         />
-
-//         <input
-//           type="password"
-//           name="password"
-//           onChange={handleChange}
-//           className="w-full p-3 border rounded mb-4 text-lg focus:outline-green-500"
-//           placeholder="Password"
-//         />
-
-//         <button
-//           onClick={handleLogin}
-//           disabled={loading}
-//           className="w-full bg-green-700 text-white p-3 rounded text-lg font-semibold hover:bg-green-800 transition cursor-pointer"
-//         >
-//           {loading ? "Logging in..." : "Login"}
-//         </button>
-
-//         <p className="text-center mt-4">
-//           New user?{" "}
-//           <Link to="/signup" className="text-green-700 font-semibold">
-//             Sign Up
-//           </Link>
-//         </p>
-//       </motion.div>
-//     </div>
-//   );
-// }
-
-// export default Login;
-
-// import { useState } from "react";
-// import { Link, useNavigate } from "react-router-dom";
-// import { motion } from "framer-motion";
-
-// function Login() {
-//   const navigate = useNavigate();
-
-//   const [form, setForm] = useState({
-//     email: "",
-//     password: "",
-//   });
-
-//   const [error, setError] = useState("");
-//   const [loading, setLoading] = useState(false);
-
-//   const handleChange = (e) => {
-//     setForm({ ...form, [e.target.name]: e.target.value });
-//   };
-
-//   const handleLogin = async () => {
-//     setError("");
-
-//     if (!form.email.trim() || !form.password.trim()) {
-//       return setError("Please fill all fields");
-//     }
-
-//     try {
-//       setLoading(true);
-
-//       const res = await fetch("http://localhost:5000/api/auth/login", {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify(form),
-//       });
-
-//       let data;
-//       try {
-//         data = await res.json();
-//       } catch {
-//         throw new Error("Server not responding properly");
-//       }
-
-//       if (!res.ok) {
-//         throw new Error(data.message || "Login failed");
-//       }
-
-//       // ✅ Save token
-//       localStorage.setItem("token", data.token);
-
-//       navigate("/chatbot");
-
-//     } catch (err) {
-//       setError(err.message);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 to-white px-4">
-
-//       <motion.div
-//         initial={{ opacity: 0, y: 40 }}
-//         animate={{ opacity: 1, y: 0 }}
-//         className="bg-white/80 backdrop-blur-lg shadow-xl rounded-2xl p-8 w-full max-w-md"
-//       >
-
-//         <h2 className="text-3xl font-bold text-center text-green-700 mb-6">
-//           🌾 Farmer Login
-//         </h2>
-
-//         {/* Error Message */}
-//         {error && (
-//           <p className="bg-red-100 text-red-600 p-2 rounded text-center mb-4">
-//             {error}
-//           </p>
-//         )}
-
-//         {/* Email */}
-//         <input
-//           name="email"
-//           value={form.email}
-//           onChange={handleChange}
-//           onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-//           className="w-full p-3 border rounded mb-4 text-lg focus:outline-green-500"
-//           placeholder="Email"
-//         />
-
-//         {/* Password */}
-//         <input
-//           type="password"
-//           name="password"
-//           value={form.password}
-//           onChange={handleChange}
-//           onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-//           className="w-full p-3 border rounded mb-4 text-lg focus:outline-green-500"
-//           placeholder="Password"
-//         />
-
-//         {/* Button */}
-//         <button
-//           onClick={handleLogin}
-//           disabled={loading}
-//           className={`w-full p-3 rounded text-lg font-semibold transition ${
-//             loading
-//               ? "bg-gray-400 cursor-not-allowed"
-//               : "bg-green-700 text-white hover:bg-green-800"
-//           }`}
-//         >
-//           {loading ? "Logging in..." : "Login"}
-//         </button>
-
-//         {/* Signup */}
-//         <p className="text-center mt-4">
-//           New user?{" "}
-//           <Link to="/signup" className="text-green-700 font-semibold">
-//             Sign Up
-//           </Link>
-//         </p>
-
-//       </motion.div>
-//     </div>
-//   );
-// }
-
-// export default Login;
-
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+// import loginBg from "../assets/loginback.avif"; // newly added
 
 function Login() {
   const navigate = useNavigate();
@@ -271,20 +36,11 @@ function Login() {
         body: JSON.stringify(form),
       });
 
-      let data;
-      try {
-        data = await res.json();
-      } catch {
-        throw new Error("Server not responding properly");
-      }
+      const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data.message || "Login failed");
-      }
+      if (!res.ok) throw new Error(data.message || "Login failed");
 
-      // ✅ Save token
       localStorage.setItem("token", data.token);
-
       navigate("/chatbot");
 
     } catch (err) {
@@ -295,71 +51,105 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 to-white px-4">
+    <div
+    
+      className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden"
+      style={{
+         background: "#070F07" }}
+      remove it for get old look
+    //   style={{
+    // backgroundImage: `url(${loginBg})`,
+    // backgroundSize: "cover",
+    // backgroundPosition: "center",
+    // backgroundRepeat: "no-repeat",
+  // }}
+    >
+      <button
+  onClick={() => navigate("/")}
+  className="absolute top-6 left-6 z-50 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-green-300 hover:text-[#BBEC6C] hover:border-[#BBEC6C]/30 transition text-sm backdrop-blur-md cursor-pointer"
+>
+  ← Home
+</button>
 
+      {/* 🔥 GLOW BACKGROUND */}
+      <div className="absolute w-[600px] h-[600px] bg-green-500 opacity-10 blur-3xl rounded-full top-[-200px] left-[-200px]" />
+      <div className="absolute w-[400px] h-[400px] bg-lime-400 opacity-10 blur-3xl rounded-full bottom-[-100px] right-[-100px]" />
+
+      {/* CARD */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white/80 backdrop-blur-lg shadow-xl rounded-2xl p-8 w-full max-w-md"
+        className="relative z-10 w-full max-w-md p-8 rounded-3xl"
+        style={{
+          background: "linear-gradient(135deg, #ffffff08, #ffffff04)",
+          border: "1px solid rgba(187,236,108,0.15)",
+          backdropFilter: "blur(14px)",
+        }}
       >
 
-        <h2 className="text-3xl font-bold text-center text-green-700 mb-6">
-          🌾 Farmer Login
+        {/* TITLE */}
+        <h2
+          className="text-4xl font-black text-center mb-6"
+          style={{ fontFamily: "'Playfair Display', serif" }}
+        >
+          🌾 <span style={{ color: "#BBEC6C" }}>Welcome Farmers</span>
         </h2>
 
-        {/* Error Message */}
+        <p className="text-center text-green-300 text-sm mb-6">
+          Login to continue your smart farming journey
+        </p>
+
+        {/* ERROR */}
         {error && (
-          <p className="bg-red-100 text-red-600 p-2 rounded text-center mb-4">
+          <div className="mb-4 text-sm text-red-400 bg-red-900/20 border border-red-500/30 p-3 rounded-lg text-center">
             {error}
-          </p>
+          </div>
         )}
 
-        {/* Email */}
+        {/* EMAIL */}
         <input
           name="email"
           value={form.email}
           onChange={handleChange}
-          onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-          className="w-full p-3 border rounded mb-4 text-lg focus:outline-green-500"
           placeholder="Email"
+          className="w-full p-3 mb-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:border-[#BBEC6C] focus:ring-1 focus:ring-[#BBEC6C]"
         />
 
-        {/* Password */}
+        {/* PASSWORD */}
         <input
           type="password"
           name="password"
           value={form.password}
           onChange={handleChange}
-          onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-          className="w-full p-3 border rounded mb-4 text-lg focus:outline-green-500"
           placeholder="Password"
+          className="w-full p-3 mb-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:border-[#BBEC6C] focus:ring-1 focus:ring-[#BBEC6C]"
         />
 
-        {/* Login Button */}
+        {/* LOGIN BUTTON */}
         <button
           onClick={handleLogin}
           disabled={loading}
-          className={`w-full p-3 rounded text-lg font-semibold transition ${
+          className={`w-full p-3 rounded-xl font-semibold transition-all ${
             loading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-green-700 text-white hover:bg-green-800"
+              ? "bg-gray-500 cursor-not-allowed"
+              : "bg-[#BBEC6C] text-[#0D2B0E] hover:bg-[#d4f77a]"
           }`}
         >
           {loading ? "Logging in..." : "Login"}
         </button>
 
-        {/* 🔥 NEW: Continue as Guest */}
+        {/* GUEST */}
         <button
           onClick={() => navigate("/chatbot")}
-          className="w-full mt-3 border border-green-700 text-green-700 p-3 rounded hover:bg-green-50 transition cursor-pointer"
+          className="w-full mt-3 p-3 rounded-xl border border-[#BBEC6C]/30 text-[#BBEC6C] hover:bg-[#BBEC6C]/10 transition"
         >
           Continue as Guest →
         </button>
 
-        {/* Signup */}
-        <p className="text-center mt-4">
+        {/* SIGNUP */}
+        <p className="text-center mt-5 text-green-300 text-sm">
           New user?{" "}
-          <Link to="/signup" className="text-green-700 font-semibold">
+          <Link to="/signup" className="text-[#BBEC6C] font-semibold">
             Sign Up
           </Link>
         </p>

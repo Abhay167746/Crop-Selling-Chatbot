@@ -73,37 +73,64 @@ import Signup from "./pages/Signup";
 import Chatbot from "./pages/Chatbot";
 
 /* Layout Controller */
+// function Layout() {
+
+//   const location = useLocation();
+
+//   const hideNavbarRoutes = ["/login", "/signup"];
+  
+
+//   // Hide navbar & footer on chatbot page
+//   const hideLayout = location.pathname === "/chatbot";
+
+//   return (
+//     <>
+//      {!hideNavbarRoutes.includes(location.pathname) && <Navbar />}
+//       {!hideLayout && <Navbar />}
+
+//       <div className={!hideLayout ? "pt-0" : ""}>
+//         <Routes>
+
+//           {/* 🔥 CHANGE: chatbot is now default */}
+//           <Route path="/" element={<Home />} />
+
+//           {/* keep all existing routes */}
+//           <Route path="/home" element={<Home />} />
+//           <Route path="/about" element={<About />} />
+//           <Route path="/login" element={<Login />} />
+//           <Route path="/signup" element={<Signup />} />
+//           <Route path="/chatbot" element={<Chatbot />} />
+
+//         </Routes>
+//       </div>
+
+//       {!hideLayout }
+//     </>
+//   );
+// }
 function Layout() {
   const location = useLocation();
 
-  // Hide navbar & footer on chatbot page
-  const hideLayout = location.pathname === "/chatbot";
+  // Pages where navbar should NOT appear
+  const hideNavbarRoutes = ["/login", "/signup", "/chatbot"];
+
+  const shouldShowNavbar = !hideNavbarRoutes.includes(location.pathname);
 
   return (
     <>
-      {!hideLayout && <Navbar />}
+      {shouldShowNavbar && <Navbar />}
 
-      <div className={!hideLayout ? "pt-0" : ""}>
-        <Routes>
-
-          {/* 🔥 CHANGE: chatbot is now default */}
-          <Route path="/" element={<Home />} />
-
-          {/* keep all existing routes */}
-          <Route path="/home" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/chatbot" element={<Chatbot />} />
-
-        </Routes>
-      </div>
-
-      {!hideLayout }
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/chatbot" element={<Chatbot />} />
+      </Routes>
     </>
   );
 }
-
 function App() {
   return (
     <BrowserRouter>
